@@ -64,7 +64,8 @@ function noPurchase() {
     console.log("Thank you for visiting the store! Come back soon!");
 }
 
-
+// created a variable to store the ITEM ID selected so it can be used by the stock calculator function later
+var itemID = 0;
 // function for the customer to select a product ID to purchase and code to return the product name
 function productSelect() {
     inquirer
@@ -74,11 +75,13 @@ function productSelect() {
             message: "Enter the ID of the product you would like to purchase: "
         })
         .then(function (answer) {
-            var query = "SELECT product_name, department_name FROM products WHERE ?";
+            var query = "SELECT item_id, product_name, department_name FROM products WHERE ?";
             connection.query(query, { item_id: answer.productID }, function (err, res) {
                 if (err) throw err;
                 for (var i = 0; i < res.length; i++) {
                     console.log("Product: " + res[i].product_name + "(" + res[i].department_name + ")" + " has been selected.");
+                    itemID = res[i].item_id;
+                    console.log("The item id is: " + itemID);
                 }
                 qty();
             });
@@ -98,6 +101,11 @@ function qty() {
         message: "Please select the quantity for the product"
 // Items to fix: add validation that a number is punched
         }).then(function (answer) {
+            var query = "SELECT stock_quantity FROM products WHERE ?";
+            connection.query(query, {item_id: itemID}, function (err, res) {
+                if (err) throw err;
+                
+            })
             console.log("You selected: " + answer.qty);
         });
 }
