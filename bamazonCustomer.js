@@ -95,17 +95,22 @@ function productSelect() {
 
 function qty() {
     inquirer
-    .prompt({
-        name: "qty",
-        type: "input",
-        message: "Please select the quantity for the product"
-// Items to fix: add validation that a number is punched
+        .prompt({
+            name: "qty",
+            type: "input",
+            message: "Please select the quantity for the product"
+            // Items to fix: add validation that a number is punched
         }).then(function (answer) {
             var query = "SELECT stock_quantity FROM products WHERE ?";
-            connection.query(query, {item_id: itemID}, function (err, res) {
+            connection.query(query, { item_id: itemID }, function (err, res) {
                 if (err) throw err;
-                
+                if (res[0].stock_quantity < answer.qty) {
+                    console.log("Sorry, we do not have sufficient quantity of that product in stock.")
+                }
+                if (res[0].stock_quantity === 0) {
+                    console.log("Sorry, that item is out of stock. Please check again later");
+                }
+
             })
-            console.log("You selected: " + answer.qty);
         });
 }
