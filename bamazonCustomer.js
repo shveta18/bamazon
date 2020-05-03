@@ -31,6 +31,7 @@ function productList() {
         purchaseDecision();
     });
 }
+
 // purchase decision
 function purchaseDecision() {
     inquirer
@@ -43,6 +44,7 @@ function purchaseDecision() {
         .then(function (answer) {
             switch (answer["purchase decision"]) {
                 case "Yes":
+                    productSelect();
                     break;
 
                 case "No":
@@ -62,15 +64,40 @@ function noPurchase() {
     console.log("Thank you for visiting the store! Come back soon!");
 }
 
+
+// function for the customer to select a product ID to purchase and code to return the product name
 function productSelect() {
     inquirer
         .prompt({
-            name: "select product ID",
-            type: "list",
-            message: "select the ID of the product you would like to purchase",
-            choices: [
-
-            ]
-
+            name: "productID",
+            type: "input",
+            message: "Enter the ID of the product you would like to purchase: "
         })
+        .then(function (answer) {
+            var query = "SELECT product_name, department_name FROM products WHERE ?";
+            connection.query(query, { item_id: answer.productID }, function (err, res) {
+                if (err) throw err;
+                for (var i = 0; i < res.length; i++) {
+                    console.log("Product: " + res[i].product_name + "(" + res[i].department_name + ")" + " has been selected.");
+                }
+                qty();
+            });
+        });
+}
+
+// Items to fix: 
+// if user enters item ID not in list, not a number
+
+// Function to take in qty value
+
+function qty() {
+    inquirer
+    .prompt({
+        name: "qty",
+        type: "input",
+        message: "Please select the quantity for the product"
+// Items to fix: add validation that a number is punched
+        }).then(function (answer) {
+            console.log("You selected: " + answer.qty);
+        });
 }
