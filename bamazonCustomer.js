@@ -15,7 +15,7 @@ connection.connect(function (err) {
     productList();
 });
 
-var products = [];
+var listLength = 0;
 // function to display all product list, prices and ids
 function productList() {
     var productList = "SELECT * FROM products;";
@@ -24,9 +24,9 @@ function productList() {
         if (err) throw err;
         for (var i = 0; i < res.length; i++) {
             console.log("Item ID: (" + res[i].item_id + ") " + res[i].product_name + " || $" + res[i].price);
-            // push all results to the products array
-            products.push(res[i]);
+            
         }
+        listLength = res.length;
         // run function for product selection
         purchaseDecision();
     });
@@ -72,7 +72,16 @@ function productSelect() {
         .prompt({
             name: "productID",
             type: "input",
-            message: "Enter the ID of the product you would like to purchase: "
+            message: "Enter the ID of the product you would like to purchase: ",
+            validate: function (value) {
+                if (isNaN(value) === false) {
+                  return true;
+                }
+                return false;
+                
+                 }
+               
+              
         })
         .then(function (answer) {
             var query = "SELECT item_id, product_name, department_name FROM products WHERE ?";
@@ -81,15 +90,12 @@ function productSelect() {
                 for (var i = 0; i < res.length; i++) {
                     console.log("Product: " + res[i].product_name + "(" + res[i].department_name + ")" + " has been selected.");
                     itemID = res[i].item_id;
-                    console.log("The item id is: " + itemID);
+                   // console.log("The item id is: " + itemID);
                 }
                 qty();
             });
         });
 }
-
-// Items to fix: 
-// if user enters item ID not in list, not a number
 
 // Function to take in qty value
 function qty() {
@@ -105,11 +111,13 @@ function qty() {
                 if (err) throw err;
                 if (res[0].stock_quantity < answer.qty) {
                     console.log("Sorry, we do not have sufficient quantity of that product in stock.")
+                    connection.end();
                 }
                 if (res[0].stock_quantity === 0) {
                     console.log("Sorry, that item is out of stock. Please check again later");
+                    connection.end();
                 }
-                if (res[0].stock_quantity > answer.qty) {
+                if (res[0].stock_quantity >= answer.qty) {
                     var qtyRequested = answer.qty;
                     var newStockQty = res[0].stock_quantity - answer.qty;
                     //console.log("The new stock qty is: " + newStockQty);
@@ -134,7 +142,7 @@ function costCalculator(qtyRequested) {
     var price = res[0].price; 
     var cost = units*price; 
    console.log("The cost of your purchase is: $" + cost);
-
+   connection.end();
     })
     
 }
