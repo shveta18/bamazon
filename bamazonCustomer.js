@@ -92,7 +92,6 @@ function productSelect() {
 // if user enters item ID not in list, not a number
 
 // Function to take in qty value
-
 function qty() {
     inquirer
         .prompt({
@@ -110,7 +109,19 @@ function qty() {
                 if (res[0].stock_quantity === 0) {
                     console.log("Sorry, that item is out of stock. Please check again later");
                 }
-
-            })
+                if (res[0].stock_quantity > answer.qty) {
+                    var newStockQty = res[0].stock_quantity - answer.qty;
+                    //console.log("The new stock qty is: " + newStockQty);
+                    updateStock(newStockQty);
+                }
+            });
         });
 }
+
+function updateStock(newStockQty) {
+    var updateQuery = "UPDATE products SET stock_quantity = ? WHERE item_id = ?";
+    connection.query(updateQuery,[newStockQty, itemID], function (err, res) {
+        console.log("Your item has been added to the cart.")
+    });
+}
+// function to calculate total cost and update
